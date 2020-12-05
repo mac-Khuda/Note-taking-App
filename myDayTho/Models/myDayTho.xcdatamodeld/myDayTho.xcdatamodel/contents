@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="17511" systemVersion="20B29" minimumToolsVersion="Automatic" sourceLanguage="Swift" userDefinedModelVersionIdentifier="">
+    <entity name="Category" representedClassName="Category" syncable="YES" codeGenerationType="class">
+        <attribute name="name" optional="YES" attributeType="String"/>
+        <relationship name="thoughts" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="Though" inverseName="parentCategory" inverseEntity="Though"/>
+    </entity>
+    <entity name="Textes" representedClassName="Textes" syncable="YES" codeGenerationType="class">
+        <attribute name="textString" optional="YES" attributeType="String"/>
+    </entity>
+    <entity name="Though" representedClassName="Though" syncable="YES" codeGenerationType="class">
+        <attribute name="date" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="title" optional="YES" attributeType="String"/>
+        <relationship name="parentCategory" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Category" inverseName="thoughts" inverseEntity="Category"/>
+    </entity>
+    <elements>
+        <element name="Category" positionX="-232.841552734375" positionY="25.38876342773438" width="128" height="73"/>
+        <element name="Textes" positionX="258.0703735351562" positionY="70.1153564453125" width="128" height="58"/>
+        <element name="Though" positionX="19.25982666015625" positionY="67.72467041015625" width="128" height="88"/>
+    </elements>
+</model>
