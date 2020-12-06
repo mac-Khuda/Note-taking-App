@@ -124,7 +124,7 @@
                     </view>
                     <navigationItem key="navigationItem" title="Name of thought" id="VNs-SV-ubA"/>
                     <connections>
-                        <outlet property="textView" destination="ruY-U4-6ww" id="98Y-Et-QCh"/>
+                        <outlet property="textLabel" destination="ruY-U4-6ww" id="98Y-Et-QCh"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="gmB-aj-86H" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>

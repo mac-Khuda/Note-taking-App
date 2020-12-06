@@ -15,61 +15,68 @@ class TextViewController: UIViewController {
     
     var textArray = [Textes]()
     
+    var previousThoughtRowNumber: Int = 0
+    
     var thoughts: Though? {
         didSet {
             navigationItem.title = thoughts?.title
-            loadText()
-            
+            textForLabel = (thoughts?.textOfThough)!
+            print("DidSet")
+            previousThoughtRowNumber = Int(thoughts!.rowNumber)
         }
         
     }
     
+    var textForLabel = ""
+    
     // MARK: - IBOutlets
 
-    @IBOutlet weak var textView: UITextView!
+    @IBOutlet weak var textLabel: UITextView!
     
     // MARK: - Lifecycle
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        loadText()
         print("viewDidLoad Done")
+        textLabel.text = textForLabel
         
     }
     
     override func viewWillDisappear(_ animated: Bool) {
-        let newStirngText = Textes(context: self.context)
-        newStirngText.textString = textView.text
-        textArray.append(newStirngText)
-        
-        saveText()
         print("Done")
+        
+    }
+    
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        let destinationVC = segue.destination as! ThoughtsTableViewController
+        destinationVC.thoughtsArray[previousThoughtRowNumber].textOfThough = textLabel.text
         
     }
     
     // MARK: - Public Methods
     
-    func saveText() {
-        do {
-            try context.save()
-            
-        } catch {
-            print("Error with saving text \(error)")
-            
-        }
-        
-    }
-    
-    func loadText() {
-        do {
-           textArray = try context.fetch(Textes.fetchRequest())
-            
-        } catch {
-            print("Error with fetching text")
-            
-        }
-        
-    }
-    
+//    func saveText() {
+//        do {
+//            try context.save()
+//
+//        } catch {
+//            print("Error with saving text \(error)")
+//
+//        }
+//
+//    }
+//
+//    func loadText() {
+//        do {
+//           textArray = try context.fetch(Textes.fetchRequest())
+//
+//        } catch {
+//            print("Error with fetching text")
+//
+//        }
+//
+//        textForLabel = textArray[0].textString!
+//
+//    }
     
 }

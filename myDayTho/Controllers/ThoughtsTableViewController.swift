@@ -16,6 +16,12 @@ class ThoughtsTableViewController: UITableViewController {
     
     var thoughtsArray = [Though]()
     
+    var newTextOfThought: Though? {
+        didSet {
+            
+        }
+    }
+    
     var selectedCategory: Category? {
         didSet {
             loadThoughts()
@@ -51,6 +57,7 @@ class ThoughtsTableViewController: UITableViewController {
             
             newThought.title = "\(textField.text!) Date: \(date) "
             newThought.parentCategory = self.selectedCategory
+            newThought.textOfThough = "Hello"
             
             self.thoughtsArray.append(newThought)
             self.saveThoughts()
@@ -128,6 +135,7 @@ class ThoughtsTableViewController: UITableViewController {
     // MARK: - TableView Delegate methods
     
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        thoughtsArray[indexPath.row].rowNumber = Int64(indexPath.row)
         performSegue(withIdentifier: "goToText", sender: self)
         
     }
