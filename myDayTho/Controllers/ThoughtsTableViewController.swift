@@ -14,13 +14,9 @@ class ThoughtsTableViewController: UITableViewController {
     
     let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
     
-    var thoughtsArray = [Though]()
+    static var thoughtsArray = [Though]()
     
-    var newTextOfThought: Though? {
-        didSet {
-            
-        }
-    }
+    static var newTextOfThought: Though?
     
     var selectedCategory: Category? {
         didSet {
@@ -57,9 +53,9 @@ class ThoughtsTableViewController: UITableViewController {
             
             newThought.title = "\(textField.text!) Date: \(date) "
             newThought.parentCategory = self.selectedCategory
-            newThought.textOfThough = "Hello"
+            newThought.textOfThough = ""
             
-            self.thoughtsArray.append(newThought)
+            ThoughtsTableViewController.thoughtsArray.append(newThought)
             self.saveThoughts()
             
         }
@@ -101,7 +97,7 @@ class ThoughtsTableViewController: UITableViewController {
         }
         
         do {
-            thoughtsArray = try context.fetch(request)
+            ThoughtsTableViewController.thoughtsArray = try context.fetch(request)
         } catch {
             print("Error with loading thoguths \(error)")
             
@@ -110,6 +106,7 @@ class ThoughtsTableViewController: UITableViewController {
         self.tableView.reloadData()
         
     }
+
     
     // MARK: - Table view data source
 
@@ -119,13 +116,13 @@ class ThoughtsTableViewController: UITableViewController {
     }
 
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return thoughtsArray.count
+        return ThoughtsTableViewController.thoughtsArray.count
         
     }
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "ThoughtsCell", for: indexPath)
-        let though = thoughtsArray[indexPath.row]
+        let though = ThoughtsTableViewController.thoughtsArray[indexPath.row]
         cell.textLabel?.text = though.title
         
         return cell
@@ -135,7 +132,7 @@ class ThoughtsTableViewController: UITableViewController {
     // MARK: - TableView Delegate methods
     
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        thoughtsArray[indexPath.row].rowNumber = Int64(indexPath.row)
+        ThoughtsTableViewController.thoughtsArray[indexPath.row].rowNumber = Int64(indexPath.row)
         performSegue(withIdentifier: "goToText", sender: self)
         
     }
@@ -144,7 +141,7 @@ class ThoughtsTableViewController: UITableViewController {
         let destinationVC = segue.destination as! TextViewController
         
         if let indexPath = tableView.indexPathForSelectedRow {
-            destinationVC.thoughts = thoughtsArray[indexPath.row]
+            destinationVC.thoughts = ThoughtsTableViewController.thoughtsArray[indexPath.row]
             
         }
     }
