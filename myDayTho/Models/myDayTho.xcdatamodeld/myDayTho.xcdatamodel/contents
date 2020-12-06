@@ -4,21 +4,15 @@
         <attribute name="name" optional="YES" attributeType="String"/>
         <relationship name="thoughts" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="Though" inverseName="parentCategory" inverseEntity="Though"/>
     </entity>
-    <entity name="Textes" representedClassName="Textes" syncable="YES" codeGenerationType="class">
-        <attribute name="textString" optional="YES" attributeType="String"/>
-        <relationship name="parentThough" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Though" inverseName="textes" inverseEntity="Though"/>
-    </entity>
     <entity name="Though" representedClassName="Though" syncable="YES" codeGenerationType="class">
         <attribute name="date" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
         <attribute name="rowNumber" attributeType="Integer 64" defaultValueString="0" usesScalarValueType="YES"/>
         <attribute name="textOfThough" attributeType="String"/>
         <attribute name="title" optional="YES" attributeType="String"/>
         <relationship name="parentCategory" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Category" inverseName="thoughts" inverseEntity="Category"/>
-        <relationship name="textes" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="Textes" inverseName="parentThough" inverseEntity="Textes"/>
     </entity>
     <elements>
         <element name="Category" positionX="-232.841552734375" positionY="25.38876342773438" width="128" height="73"/>
-        <element name="Though" positionX="-40.0692138671875" positionY="35.94125366210938" width="128" height="133"/>
-        <element name="Textes" positionX="203.0377197265625" positionY="48.0025634765625" width="128" height="59"/>
+        <element name="Though" positionX="-40.0692138671875" positionY="35.94125366210938" width="128" height="118"/>
     </elements>
 </model>

@@ -13,16 +13,17 @@ class TextViewController: UIViewController {
     
     let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
     
-    var textArray = [Textes]()
-    
     var previousThoughtRowNumber: Int = 0
     
     var thoughts: Though? {
         didSet {
             navigationItem.title = thoughts?.title
+            
             textForLabel = (thoughts?.textOfThough)!
             print("DidSet")
             previousThoughtRowNumber = Int(thoughts!.rowNumber)
+            
+            ThoughtsTableViewController.newTextOfThought = thoughts
         }
         
     }
@@ -40,43 +41,28 @@ class TextViewController: UIViewController {
         print("viewDidLoad Done")
         textLabel.text = textForLabel
         
-    }
-    
-    override func viewWillDisappear(_ animated: Bool) {
-        print("Done")
         
     }
     
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        let destinationVC = segue.destination as! ThoughtsTableViewController
-        destinationVC.thoughtsArray[previousThoughtRowNumber].textOfThough = textLabel.text
+    override func viewWillDisappear(_ animated: Bool) {
+        ThoughtsTableViewController.newTextOfThought?.textOfThough = textLabel.text
+        ThoughtsTableViewController.thoughtsArray[previousThoughtRowNumber].textOfThough = textLabel.text
+        saveText()
+        print("viewWillDisappear")
         
     }
     
     // MARK: - Public Methods
     
-//    func saveText() {
-//        do {
-//            try context.save()
-//
-//        } catch {
-//            print("Error with saving text \(error)")
-//
-//        }
-//
-//    }
-//
-//    func loadText() {
-//        do {
-//           textArray = try context.fetch(Textes.fetchRequest())
-//
-//        } catch {
-//            print("Error with fetching text")
-//
-//        }
-//
-//        textForLabel = textArray[0].textString!
-//
-//    }
+    func saveText() {
+        do {
+            try context.save()
+
+        } catch {
+            print("Error with saving text \(error)")
+
+        }
+
+    }
     
 }
