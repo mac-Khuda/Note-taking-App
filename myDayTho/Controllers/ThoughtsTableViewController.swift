@@ -37,6 +37,11 @@ class ThoughtsTableViewController: UITableViewController {
 
     }
     
+    override func viewWillAppear(_ animated: Bool) {
+        loadThoughts()
+        
+    }
+    
     // MARK: - IBActions
     
     @IBAction func addButtonPressed(_ sender: UIBarButtonItem) {

@@ -29,6 +29,7 @@ class TextViewController: UIViewController {
         
     }
     
+    
     var textForLabel = ""
     
     // MARK: - IBOutlets
@@ -45,10 +46,15 @@ class TextViewController: UIViewController {
     }
     
     override func viewWillDisappear(_ animated: Bool) {
+        if textForLabel != textLabel.text {
+            let date = Date()
+            ThoughtsTableViewController.thoughtsArray[previousThoughtRowNumber].date = date
+            
+        }
+        
         ThoughtsTableViewController.newTextOfThought?.textOfThough = textLabel.text
         ThoughtsTableViewController.thoughtsArray[previousThoughtRowNumber].textOfThough = textLabel.text
         saveText()
-        print("viewWillDisappear")
         
     }
     
