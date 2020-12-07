@@ -47,13 +47,11 @@ class ThoughtsTableViewController: UITableViewController {
             let newThought = Though(context: self.context)
             
             let now = Date()
-            let formatter = DateFormatter()
-            formatter.dateFormat = "HH:mm E, d MMM y"
-            let date = formatter.string(from: now)
             
-            newThought.title = "\(textField.text!) Date: \(date) "
+            newThought.title = textField.text!
             newThought.parentCategory = self.selectedCategory
             newThought.textOfThough = ""
+            newThought.date = now
             
             ThoughtsTableViewController.thoughtsArray.append(newThought)
             self.saveThoughts()
@@ -123,7 +121,13 @@ class ThoughtsTableViewController: UITableViewController {
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "ThoughtsCell", for: indexPath)
         let though = ThoughtsTableViewController.thoughtsArray[indexPath.row]
+        
+        let formatter = DateFormatter()
+        formatter.dateFormat = "HH:mm E, d MMM y"
+        let date = formatter.string(from: though.date!)
+        
         cell.textLabel?.text = though.title
+        cell.detailTextLabel?.text = date
         
         return cell
         

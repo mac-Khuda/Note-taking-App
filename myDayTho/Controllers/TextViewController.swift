@@ -20,10 +20,11 @@ class TextViewController: UIViewController {
             navigationItem.title = thoughts?.title
             
             textForLabel = (thoughts?.textOfThough)!
-            print("DidSet")
+            
             previousThoughtRowNumber = Int(thoughts!.rowNumber)
             
             ThoughtsTableViewController.newTextOfThought = thoughts
+            
         }
         
     }
@@ -38,9 +39,8 @@ class TextViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        print("viewDidLoad Done")
-        textLabel.text = textForLabel
         
+        textLabel.text = textForLabel
         
     }
     
