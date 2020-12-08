@@ -6,31 +6,26 @@
 //
 
 import UIKit
+import RealmSwift
 
 class TextViewController: UIViewController {
     
     // MARK: - Public Properties
     
-    let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
+    let realm = try! Realm()
+        
+    var textForLabel = ""
     
-    var previousThoughtRowNumber: Int = 0
-    
-    var thoughts: Though? {
+    var thoughtTextVC: Thought? {
         didSet {
-            navigationItem.title = thoughts?.title
-            
-            textForLabel = (thoughts?.textOfThough)!
-            
-            previousThoughtRowNumber = Int(thoughts!.rowNumber)
-            
-            ThoughtsTableViewController.newTextOfThought = thoughts
-            
+            navigationItem.title = thoughtTextVC?.title
+          
+            textForLabel = thoughtTextVC!.textOfThought
+           
         }
         
     }
     
-    
-    var textForLabel = ""
     
     // MARK: - IBOutlets
 
@@ -46,29 +41,20 @@ class TextViewController: UIViewController {
     }
     
     override func viewWillDisappear(_ animated: Bool) {
-        if textForLabel != textLabel.text {
-            let date = Date()
-            ThoughtsTableViewController.thoughtsArray[previousThoughtRowNumber].date = date
+        if thoughtTextVC?.textOfThought != textLabel.text {
+            
+            do {
+                try realm.write() {
+                    thoughtTextVC?.dateCreated = Date()
+                    thoughtTextVC?.textOfThought = textLabel.text
+                    
+                }
+            } catch {
+                print("Error saving text of thought")
+            }
             
         }
         
-        ThoughtsTableViewController.newTextOfThought?.textOfThough = textLabel.text
-        ThoughtsTableViewController.thoughtsArray[previousThoughtRowNumber].textOfThough = textLabel.text
-        saveText()
-        
-    }
-    
-    // MARK: - Public Methods
-    
-    func saveText() {
-        do {
-            try context.save()
-
-        } catch {
-            print("Error with saving text \(error)")
-
-        }
-
     }
     
 }

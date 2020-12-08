@@ -6,17 +6,15 @@
 //
 
 import UIKit
-import CoreData
+import RealmSwift
 
 class ThoughtsTableViewController: UITableViewController {
     
     // MARK: - Public Propeties
     
-    let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
+    let realm = try! Realm()
     
-    static var thoughtsArray = [Though]()
-    
-    static var newTextOfThought: Though?
+    var thoughts: Results<Thought>?
     
     var selectedCategory: Category? {
         didSet {
@@ -31,10 +29,10 @@ class ThoughtsTableViewController: UITableViewController {
     @IBOutlet weak var searchBar: UISearchBar!
     
     // MARK: - Lifecycle
-
+    
     override func viewDidLoad() {
         super.viewDidLoad()
-
+        
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -49,17 +47,26 @@ class ThoughtsTableViewController: UITableViewController {
         
         let alert = UIAlertController(title: "Add new thought", message: "", preferredStyle: .alert)
         let action = UIAlertAction(title: "Add thought", style: .default) { (alert) in
-            let newThought = Though(context: self.context)
             
-            let now = Date()
-            
-            newThought.title = textField.text!
-            newThought.parentCategory = self.selectedCategory
-            newThought.textOfThough = ""
-            newThought.date = now
-            
-            ThoughtsTableViewController.thoughtsArray.append(newThought)
-            self.saveThoughts()
+            if let currentCategory = self.selectedCategory {
+                do {
+                    try self.realm.write() {
+                        let newThought = Thought()
+                        
+                        let now = Date()
+                        
+                        newThought.title = textField.text!
+                        newThought.textOfThought = ""
+                        newThought.dateCreated = now
+                        
+                        currentCategory.thoughts.append(newThought)
+                    }
+                } catch {
+                    print("Error adding new thought \(error)")
+                }
+            }
+
+            self.tableView.reloadData()
             
         }
         
@@ -76,63 +83,37 @@ class ThoughtsTableViewController: UITableViewController {
     
     // MARK: - Public Methods
     
-    func saveThoughts() {
-        do {
-            try context.save()
-            
-        } catch {
-            print("Error with saving thought \(error)")
-            
-        }
+    func loadThoughts() {
+        
+        thoughts = selectedCategory?.thoughts.sorted(byKeyPath: "dateCreated", ascending: true)
         
         self.tableView.reloadData()
         
     }
     
-    func loadThoughts(with request: NSFetchRequest<Though> = Though.fetchRequest(), predicate: NSPredicate? = nil) {
-        
-        let categoryPredicate = NSPredicate(format: "parentCategory.name MATCHES %@", selectedCategory!.name!)
-        
-        if let addtitionalPredicate = predicate {
-            request.predicate = NSCompoundPredicate(andPredicateWithSubpredicates: [categoryPredicate, addtitionalPredicate])
-        } else {
-            request.predicate = categoryPredicate
-        }
-        
-        do {
-            ThoughtsTableViewController.thoughtsArray = try context.fetch(request)
-        } catch {
-            print("Error with loading thoguths \(error)")
-            
-        }
-        
-        self.tableView.reloadData()
-        
-    }
-
     
     // MARK: - Table view data source
-
+    
     override func numberOfSections(in tableView: UITableView) -> Int {
         return 1
         
     }
-
+    
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return ThoughtsTableViewController.thoughtsArray.count
+        return thoughts?.count ?? 1
         
     }
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "ThoughtsCell", for: indexPath)
-        let though = ThoughtsTableViewController.thoughtsArray[indexPath.row]
-        
-        let formatter = DateFormatter()
-        formatter.dateFormat = "HH:mm E, d MMM y"
-        let date = formatter.string(from: though.date!)
-        
-        cell.textLabel?.text = though.title
-        cell.detailTextLabel?.text = date
+        if let though = thoughts?[indexPath.row] {
+            let formatter = DateFormatter()
+            formatter.dateFormat = "HH:mm E, d MMM y"
+            let date = formatter.string(from: though.dateCreated)
+            
+            cell.textLabel?.text = though.title
+            cell.detailTextLabel?.text = date
+        }
         
         return cell
         
@@ -141,7 +122,6 @@ class ThoughtsTableViewController: UITableViewController {
     // MARK: - TableView Delegate methods
     
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        ThoughtsTableViewController.thoughtsArray[indexPath.row].rowNumber = Int64(indexPath.row)
         performSegue(withIdentifier: "goToText", sender: self)
         
     }
@@ -150,20 +130,17 @@ class ThoughtsTableViewController: UITableViewController {
         let destinationVC = segue.destination as! TextViewController
         
         if let indexPath = tableView.indexPathForSelectedRow {
-            destinationVC.thoughts = ThoughtsTableViewController.thoughtsArray[indexPath.row]
+            destinationVC.thoughtTextVC = thoughts?[indexPath.row]
             
         }
     }
-
+    
 }
 
 extension ThoughtsTableViewController: UISearchBarDelegate {
     func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
-        let request: NSFetchRequest<Though> = Though.fetchRequest()
-        let predicate = NSPredicate(format: "title CONTAINS[cd] %@", searchBar.text!)
-        request.sortDescriptors = [NSSortDescriptor(key: "title", ascending: true)]
-        
-        loadThoughts(with: request, predicate: predicate)
+        thoughts = thoughts?.filter("title CONTAINS[cd] %@", searchBar.text!)
+        tableView.reloadData()
     }
     
     func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
