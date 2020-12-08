@@ -52,9 +52,7 @@ class TextViewController: UIViewController {
             } catch {
                 print("Error saving text of thought")
             }
-            
         }
-        
     }
     
 }
