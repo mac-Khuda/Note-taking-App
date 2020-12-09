@@ -1,4 +1,4 @@
-platform :ios, '9.0'
+#platform :ios, '9.0'
 
 target 'myDayTho' do
   # Comment the next line if you don't want to use dynamic frameworks
@@ -7,5 +7,6 @@ target 'myDayTho' do
   # Pods for myDayTho
 
 pod 'RealmSwift'
+pod 'SwipeCellKit'
 
 end

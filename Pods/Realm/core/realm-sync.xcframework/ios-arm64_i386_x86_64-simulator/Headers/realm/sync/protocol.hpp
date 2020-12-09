@@ -18,9 +18,11 @@ namespace sync {
 //   1 Initial version, matching io.realm.sync-30, but not including query-based
 //     sync, serialized transactions, and state realms (async open).
 //
+//   2 Restored erase-always-wins OT behavior.
+//
 constexpr int get_current_protocol_version() noexcept
 {
-    return 1;
+    return 2;
 }
 
 constexpr const char* get_websocket_protocol_prefix() noexcept

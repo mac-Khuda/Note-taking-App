@@ -30,12 +30,14 @@ namespace sync {
     X(EraseColumn)                                                                                                   \
     X(CreateObject)                                                                                                  \
     X(EraseObject)                                                                                                   \
-    X(Set)                                                                                                           \
+    X(Update)                                                                                                        \
     X(AddInteger)                                                                                                    \
     X(ArrayInsert)                                                                                                   \
     X(ArrayMove)                                                                                                     \
     X(ArrayErase)                                                                                                    \
-    X(ArrayClear)
+    X(Clear)                                                                                                         \
+    X(SetInsert)                                                                                                     \
+    X(SetErase)
 
 struct StringBufferRange {
     uint32_t offset, size;
@@ -163,6 +165,8 @@ struct Payload {
     enum class Type : int8_t {
         // Special value indicating that an embedded object should be created at
         // the position.
+        Erased = -4,
+        Dictionary = -3,
         ObjectValue = -2,
         GlobalKey = -1,
         Null = 0,
@@ -298,6 +302,10 @@ struct Payload {
     {
         if (lhs.type == rhs.type) {
             switch (lhs.type) {
+                case Type::Erased:
+                    return true;
+                case Type::Dictionary:
+                    return true;
                 case Type::ObjectValue:
                     return true;
                 case Type::GlobalKey:
@@ -461,7 +469,7 @@ struct EraseObject : ObjectInstruction {
     }
 };
 
-struct Set : PathInstruction {
+struct Update : PathInstruction {
     using PathInstruction::PathInstruction;
 
     // Note: For "ArraySet", the path ends with an integer.
@@ -471,7 +479,7 @@ struct Set : PathInstruction {
         uint32_t prior_size; // For "ArraySet"
     };
 
-    Set()
+    Update()
         : prior_size(0)
     {
     }
@@ -481,7 +489,7 @@ struct Set : PathInstruction {
         return path.is_array_index();
     }
 
-    bool operator==(const Set& rhs) const noexcept
+    bool operator==(const Update& rhs) const noexcept
     {
         return PathInstruction::operator==(rhs) && value == rhs.value &&
                (is_array_set() ? is_default == rhs.is_default : prior_size == rhs.prior_size);
@@ -533,15 +541,35 @@ struct ArrayErase : PathInstruction {
     }
 };
 
-struct ArrayClear : PathInstruction {
+struct Clear : PathInstruction {
     using PathInstruction::PathInstruction;
-    uint32_t prior_size;
 
-    bool operator==(const ArrayClear& rhs) const noexcept
+    bool operator==(const Clear& rhs) const noexcept
     {
-        return PathInstruction::operator==(rhs) && prior_size == rhs.prior_size;
+        return PathInstruction::operator==(rhs);
     }
 };
+
+struct SetInsert : PathInstruction {
+    using PathInstruction::PathInstruction;
+    Payload value;
+
+    bool operator==(const SetInsert& rhs) const noexcept
+    {
+        return PathInstruction::operator==(rhs) && value == rhs.value;
+    }
+};
+
+struct SetErase : PathInstruction {
+    using PathInstruction::PathInstruction;
+    Payload value;
+
+    bool operator==(const SetErase& rhs) const noexcept
+    {
+        return PathInstruction::operator==(rhs) && value == rhs.value;
+    }
+};
+
 
 } // namespace instr
 
@@ -565,14 +593,16 @@ struct Instruction {
         EraseTable = 1,
         CreateObject = 2,
         EraseObject = 3,
-        Set = 4, // Note: Also covers ArraySet
+        Update = 4, // Note: Also covers ArrayUpdate
         AddInteger = 5,
         AddColumn = 6,
         EraseColumn = 7,
         ArrayInsert = 8,
         ArrayMove = 9,
         ArrayErase = 10,
-        ArrayClear = 11,
+        Clear = 11,
+        SetInsert = 12,
+        SetErase = 13,
     };
 
     template <Type t>
@@ -669,6 +699,10 @@ inline const char* get_type_name(Instruction::Payload::Type type)
 {
     using Type = Instruction::Payload::Type;
     switch (type) {
+        case Type::Erased:
+            return "Erased";
+        case Type::Dictionary:
+            return "Dictionary";
         case Type::ObjectValue:
             return "ObjectValue";
         case Type::GlobalKey:
@@ -747,10 +781,10 @@ inline DataType get_data_type(Instruction::Payload::Type type) noexcept
             return type_Link;
         case Type::ObjectId:
             return type_ObjectId;
+        case Type::Erased:
+        case Type::Dictionary:
         case Type::ObjectValue:
-            [[fallthrough]];
         case Type::GlobalKey:
-            [[fallthrough]];
         case Type::Null:
             REALM_TERMINATE("Invalid data type");
     }
@@ -824,11 +858,11 @@ struct Instruction::Visitor {
         return lambda(instr);
     }
 
-    auto operator()(const Instruction::Vector&) -> decltype(lambda(std::declval<const Instruction::Set&>()))
+    auto operator()(const Instruction::Vector&) -> decltype(lambda(std::declval<const Instruction::Update&>()))
     {
         REALM_TERMINATE("visiting instruction vector");
     }
-    auto operator()(Instruction::Vector&) -> decltype(lambda(std::declval<Instruction::Set&>()))
+    auto operator()(Instruction::Vector&) -> decltype(lambda(std::declval<Instruction::Update&>()))
     {
         REALM_TERMINATE("visiting instruction vector");
     }
