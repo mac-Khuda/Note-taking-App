@@ -8,7 +8,7 @@
 import UIKit
 import RealmSwift
 
-class ThoughtsTableViewController: UITableViewController {
+class ThoughtsTableViewController: SwipeCellTableViewController {
     
     // MARK: - Public Propeties
     
@@ -32,6 +32,8 @@ class ThoughtsTableViewController: UITableViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        tableView.rowHeight = 50.0
         
     }
     
@@ -81,7 +83,7 @@ class ThoughtsTableViewController: UITableViewController {
         
     }
     
-    // MARK: - Public Methods
+    // MARK: - Data Manipulation Methods
     
     func loadThoughts() {
         
@@ -89,6 +91,18 @@ class ThoughtsTableViewController: UITableViewController {
         
         self.tableView.reloadData()
         
+    }
+    
+    override func updateModel(at indexPath: IndexPath) {
+        if let thoughtForDeletion = thoughts?[indexPath.row] {
+            do {
+                try realm.write() {
+                    realm.delete(thoughtForDeletion)
+                }
+            } catch {
+                print("Error with deleting thought \(error)")
+            }
+        }
     }
     
     
@@ -105,7 +119,7 @@ class ThoughtsTableViewController: UITableViewController {
     }
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "ThoughtsCell", for: indexPath)
+        let cell = super.tableView(tableView, cellForRowAt: indexPath)
         if let though = thoughts?[indexPath.row] {
             let formatter = DateFormatter()
             formatter.dateFormat = "HH:mm E, d MMM y"

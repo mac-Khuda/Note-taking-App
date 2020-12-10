@@ -7,9 +7,8 @@
 
 import UIKit
 import RealmSwift
-import SwipeCellKit
 
-class CategoriesViewController: UITableViewController {
+class CategoriesViewController: SwipeCellTableViewController {
     
     // MARK: - Public Properties
     let realm = try! Realm()
@@ -78,6 +77,19 @@ class CategoriesViewController: UITableViewController {
         
     }
     
+    override func updateModel(at indexPath: IndexPath) {
+        if let cellForDeletion = self.categories?[indexPath.row] {
+            do {
+                try self.realm.write() {
+                    self.realm.delete(cellForDeletion)
+                }
+            } catch {
+                print("Error with deleting category \(error)")
+            }
+        }
+        
+    }
+    
     
     // MARK: - Table view data source
     
@@ -90,13 +102,12 @@ class CategoriesViewController: UITableViewController {
     }
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "CategoryCell", for: indexPath) as! SwipeTableViewCell
+        let cell = super.tableView(tableView, cellForRowAt: indexPath)
         if let category = categories?[indexPath.row] {
             cell.textLabel?.text = category.name
         } else {
             cell.textLabel?.text = "You didn't add categories yet"
         }
-        cell.delegate = self
         
         return cell
     }
@@ -141,37 +152,6 @@ extension CategoriesViewController: UISearchBarDelegate {
                 
             }
         }
-    }
-    
-}
-
-// MARK: - SwipeTableViewCell Delegate Methods
-
-extension CategoriesViewController: SwipeTableViewCellDelegate {
-    func tableView(_ tableView: UITableView, editActionsForRowAt indexPath: IndexPath, for orientation: SwipeActionsOrientation) -> [SwipeAction]? {
-        guard orientation == .right else { return nil }
-
-        let deleteAction = SwipeAction(style: .destructive, title: "Delete") { action, indexPath in
-            if let cellForDeletion = self.categories?[indexPath.row] {
-                do {
-                    try self.realm.write() {
-                        self.realm.delete(cellForDeletion)
-                    }
-                } catch {
-                    print("Error with deleting category \(error)")
-                }
-            }
-        }
-
-        deleteAction.image = UIImage(named: "delete-icon")
-
-        return [deleteAction]
-    }
-    
-    func tableView(_ tableView: UITableView, editActionsOptionsForRowAt indexPath: IndexPath, for orientation: SwipeActionsOrientation) -> SwipeOptions {
-        var options = SwipeOptions()
-        options.expansionStyle = .destructive
-        return options
     }
     
 }
